@@ -1,0 +1,49 @@
+int main() {
+    int choice, num_ports;
+    pthread_t threads[10];
+
+    printf("Select synchronization mechanism:\n");
+    printf("1. Semaphore\n");
+    printf("2. Monitor\n");
+    printf("Enter choice: ");
+    scanf("%d", &choice);
+
+    printf("Enter number of ports to open (max 10): ");
+    scanf("%d", &num_ports);
+
+    if (num_ports > 10) num_ports = 10;
+
+    int ports[num_ports];
+    for (int i = 0; i < num_ports; i++) {
+        ports[i] = i + 1;  // Assign port numbers
+    }
+
+    switch (choice) {
+        case 1:
+            sem_init(&semaphore, 0, MAX_PORTS);
+            for (int i = 0; i < num_ports; i++) {
+                pthread_create(&threads[i], NULL, open_port_semaphore, &ports[i]);
+            }
+            for (int i = 0; i < num_ports; i++) {
+                pthread_join(threads[i], NULL);
+            }
+            sem_destroy(&semaphore);
+            break;
+
+        case 2:
+            for (int i = 0; i < num_ports; i++) {
+                pthread_create(&threads[i], NULL, open_port_monitor, &ports[i]);
+            }
+            for (int i = 0; i < num_ports; i++) {
+                pthread_join(threads[i], NULL);
+            }
+            break;
+
+        default:
+            printf("Invalid choice.\n");
+            break;
+    }
+
+    return 0;
+}
+
